@@ -1,7 +1,8 @@
 .env
 .venv/
 __pycache__/
-*.pyc.cursor/
+*.pyc
+.cursor/
 .mcp.json
 CLAUDE.md
 charter.yaml
