@@ -1,0 +1,8 @@
+.env
+.venv/
+__pycache__/
+*.pyc.cursor/
+.mcp.json
+CLAUDE.md
+charter.yaml
+system-prompt.txt
