@@ -12,7 +12,7 @@ env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=env_path, override=True)
 
 
-def get_provider(provider_name: str) -> LLMProvider:
+def get_llm_provider(provider_name: str) -> LLMProvider:
     """Return the provider object that matches the given name."""
     name = provider_name.strip().lower()
 

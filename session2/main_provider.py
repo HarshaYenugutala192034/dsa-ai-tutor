@@ -1,36 +1,26 @@
-﻿from client import LLMClient
-from factory import get_provider
+﻿from dotenv import load_dotenv
 
-TUTOR_PROMPT = (
-    "You are a friendly Data Structures and Algorithms tutor. "
-    "Explain concepts in simple language with examples and analogies.\n\n"
-    "Student question: {question}"
-)
+from client import LLMClient
+from factory import get_llm_provider
 
-PROVIDER_NAMES = {"1": "gemini", "2": "ollama"}
+load_dotenv()
 
-print("\n===== DSA AI TUTOR =====")
-choice = input("\nChoose provider (1 = Gemini, 2 = Ollama): ").strip()
+print("1. Gemini (Hosted LLM)")
+print("2. Ollama (Local LLM)")
 
-if choice not in PROVIDER_NAMES:
-    raise SystemExit("\nInvalid choice. Enter 1 or 2.")
+choice = input("\nSelect your LLM provider (1 or 2): ").strip()
 
-try:
-    # The factory returns the provider the user chose
-    provider = get_provider(PROVIDER_NAMES[choice])
+if choice == "1":
+    provider_name = "gemini"
+elif choice == "2":
+    provider_name = "ollama"
+else:
+    raise ValueError("Invalid selection. Please enter 1 or 2.")
 
-    # The client holds that provider
-    client = LLMClient(provider)
+provider = get_llm_provider(provider_name)
+client = LLMClient(provider)
 
-    question = input("\nWhat would you like to learn today? ").strip()
-    if not question:
-        raise SystemExit("\nPlease enter a question and run the program again.")
+prompt = input("Enter your Question ")
+answer = client.generate_response(prompt)
 
-    answer = client.generate_response(TUTOR_PROMPT.format(question=question))
-except SystemExit:
-    raise
-except Exception as error:
-    raise SystemExit(f"\nRequest failed:\n{error}")
-
-print("\n===== DSA AI TUTOR RESPONSE =====\n")
-print(answer or "No text was returned. Try rephrasing your question.")
+print(answer)
