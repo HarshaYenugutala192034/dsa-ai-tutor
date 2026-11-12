@@ -1,5 +1,5 @@
-﻿from gemini_provider import GeminiProvider
-from ollama_provider import OllamaProvider
+﻿from client import LLMClient
+from factory import get_provider
 
 TUTOR_PROMPT = (
     "You are a friendly Data Structures and Algorithms tutor. "
@@ -7,22 +7,26 @@ TUTOR_PROMPT = (
     "Student question: {question}"
 )
 
+PROVIDER_NAMES = {"1": "gemini", "2": "ollama"}
+
 print("\n===== DSA AI TUTOR =====")
 choice = input("\nChoose provider (1 = Gemini, 2 = Ollama): ").strip()
 
+if choice not in PROVIDER_NAMES:
+    raise SystemExit("\nInvalid choice. Enter 1 or 2.")
+
 try:
-    if choice == "1":
-        provider = GeminiProvider()
-    elif choice == "2":
-        provider = OllamaProvider()
-    else:
-        raise SystemExit("\nInvalid choice. Enter 1 or 2.")
+    # The factory returns the provider the user chose
+    provider = get_provider(PROVIDER_NAMES[choice])
+
+    # The client holds that provider
+    client = LLMClient(provider)
 
     question = input("\nWhat would you like to learn today? ").strip()
     if not question:
         raise SystemExit("\nPlease enter a question and run the program again.")
 
-    answer = provider.generate_response(TUTOR_PROMPT.format(question=question))
+    answer = client.generate_response(TUTOR_PROMPT.format(question=question))
 except SystemExit:
     raise
 except Exception as error:
