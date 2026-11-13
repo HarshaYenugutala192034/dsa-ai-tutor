@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 from base import LLMProvider
 from gemini_provider import GeminiProvider
+from gpt_provider import GPTProvider
 from ollama_provider import OllamaProvider
 
 # .env is in the main project folder, one level above session2
@@ -17,18 +18,20 @@ def get_llm_provider(provider_name: str) -> LLMProvider:
     name = provider_name.strip().lower()
 
     if name == "gemini":
-        # Read Gemini API key from the .env file
         api_key = os.getenv("GEMINI_API_KEY")
-
-        # Validate API key
         if not api_key:
             raise ValueError("Gemini API key not found in .env file")
-
         return GeminiProvider(api_key=api_key)
+
+    if name == "gpt":
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OpenAI API key not found in .env file")
+        return GPTProvider(api_key=api_key)
 
     if name == "ollama":
         return OllamaProvider()
 
     raise ValueError(
-        f"Unknown provider '{provider_name}'. Choose 'gemini' or 'ollama'."
+        f"Unknown provider '{provider_name}'. Choose 'gemini', 'gpt' or 'ollama'."
     )

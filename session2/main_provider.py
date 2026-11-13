@@ -7,15 +7,18 @@ load_dotenv()
 
 print("1. Gemini (Hosted LLM)")
 print("2. Ollama (Local LLM)")
+print("3. GPT (OpenAI Hosted LLM)")
 
-choice = input("\nSelect your LLM provider (1 or 2): ").strip()
+choice = input("\nSelect your LLM provider (1, 2 or 3): ").strip()
 
 if choice == "1":
     provider_name = "gemini"
 elif choice == "2":
     provider_name = "ollama"
+elif choice == "3":
+    provider_name = "gpt"
 else:
-    raise ValueError("Invalid selection. Please enter 1 or 2.")
+    raise ValueError("Invalid selection. Please enter 1, 2 or 3.")
 
 provider = get_llm_provider(provider_name)
 client = LLMClient(provider)
