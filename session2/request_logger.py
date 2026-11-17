@@ -23,7 +23,7 @@ class RequestLogger:
         print("MongoDB Logger connected successfully!")
 
     def log(self, provider, model, prompt, response, latency_ms,
-            status="success", error=None):
+            status="success", error=None, **extra):
         record = {
             "provider": provider,
             "model": model,
@@ -34,6 +34,7 @@ class RequestLogger:
             "error": error,
             "request_time": datetime.now(timezone.utc),
         }
+        record.update(extra)  # input_tokens, output_tokens, cost, etc.
         return self.collection.insert_one(record).inserted_id
 
     def close(self):
