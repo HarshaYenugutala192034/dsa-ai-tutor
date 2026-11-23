@@ -10,3 +10,6 @@ system-prompt.txt
 
 session4/model/data/
 2500031726/
+
+session4/compare_output/
+session5/word2vec_stories.model*
