@@ -13,3 +13,6 @@ session4/model/data/
 
 session4/compare_output/
 session5/word2vec_stories.model*
+
+session4/model/tokenization/output/tokenized_data.jsonl
+session4/model/embeddings/output/
