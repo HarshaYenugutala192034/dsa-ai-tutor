@@ -1,43 +1,54 @@
+
 import json
 from pathlib import Path
 import torch
 import torch.nn as nn
+from tokenizers import Tokenizer
 
+# 1. File paths
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 1. File paths (relative to project root)
-TOKENIZED_FILE = Path("session4/model/tokenization/output/tokenized_data.jsonl")
-OUTPUT_DIR = Path("session4/model/embeddings/output")
+TOKENIZER_FILE = BASE_DIR / "TOKENIZATION" / "output" / "bpe_tokenizer.json"
+TRAIN_FILE = BASE_DIR / "DATA" / "train.jsonl"
+
+OUTPUT_DIR = BASE_DIR / "EMBEDDINGS" / "output"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
 
 # 2. Embedding configuration
 D_MODEL = 128
 torch.manual_seed(42)
 
+# 3. Load trained tokenizer
+tokenizer = Tokenizer.from_file(str(TOKENIZER_FILE))
 
-# 3. Read tokenized data
+VOCAB_SIZE = tokenizer.get_vocab_size()
+
+print("Vocabulary size:", VOCAB_SIZE)
+
+# 4. Read stories and tokenize them
 all_stories = []
 
-with open(TOKENIZED_FILE, "r", encoding="utf-8") as file:
+with open(TRAIN_FILE, "r", encoding="utf-8") as file:
     for line in file:
         if line.strip():
-            all_stories.append(json.loads(line))
+            story = json.loads(line)["text"]
 
+            encoding = tokenizer.encode(story)
 
-# 4. Find vocabulary size and maximum sequence length
-VOCAB_SIZE = max(
-    max(story["token_ids"]) for story in all_stories
-) + 1
+            all_stories.append({
+                "tokens": encoding.tokens,
+                "token_ids": encoding.ids
+            })
 
+# 5. Find maximum sequence length
 MAX_SEQ_LEN = max(
     len(story["token_ids"]) for story in all_stories
 )
 
-print("Vocabulary size:", VOCAB_SIZE)
+print("Total stories:", len(all_stories))
 print("Maximum sequence length:", MAX_SEQ_LEN)
 
-
-# 5. Token and Position Embedding class
+# 6. Token and Position Embedding class
 class TokenAndPositionEmbedding(nn.Module):
 
     def __init__(self, vocab_size, d_model, max_seq_len):
@@ -48,6 +59,7 @@ class TokenAndPositionEmbedding(nn.Module):
         self.max_seq_len = max_seq_len
 
     def forward(self, input_ids):
+
         seq_len = input_ids.shape[1]
 
         if seq_len > self.max_seq_len:
@@ -60,14 +72,12 @@ class TokenAndPositionEmbedding(nn.Module):
 
         return token_vectors + position_vectors.unsqueeze(0)
 
-
-# 6. Create embedding layer
+# 7. Create embedding layer
 embedding_layer = TokenAndPositionEmbedding(
     VOCAB_SIZE, D_MODEL, MAX_SEQ_LEN
 )
 
-
-# 7. Generate embeddings for all stories
+# 8. Generate embeddings
 all_embeddings = {}
 
 for i, story in enumerate(all_stories):
@@ -85,15 +95,10 @@ for i, story in enumerate(all_stories):
         "final_embeddings": embeddings.squeeze(0)
     }
 
-    if (i + 1) % 5000 == 0:
-        print(f"  Embedded {i+1} stories...")
-
-
-# 8. Save all embeddings
+# 9. Save embeddings
 OUTPUT_FILE = OUTPUT_DIR / "all_embeddings.pt"
 torch.save(all_embeddings, OUTPUT_FILE)
 
 print("\nEmbedding generation completed.")
-print("Total stories:", len(all_embeddings))
 print("Embedding dimension:", D_MODEL)
 print("Saved at:", OUTPUT_FILE.resolve())
